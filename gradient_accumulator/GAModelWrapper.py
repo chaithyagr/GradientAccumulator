@@ -86,7 +86,11 @@ class GAModelWrapper(tf.keras.Model):
 
     def reinit_grad_accum(self):
         self.gradient_accumulation = [ 
-            tf.zeros_like(var) for var in self.trainable_variables
+            tf.Variable(
+                tf.zeros_like(var),
+                trainable=False,
+                dtype=tf.float32
+            ) for var in self.trainable_variables
         ]
         self.accum_step_counter.assign(0)
     """
