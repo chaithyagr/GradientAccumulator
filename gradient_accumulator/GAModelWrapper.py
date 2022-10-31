@@ -64,7 +64,7 @@ class GAModelWrapper(tf.keras.Model):
 
         # Accumulate batch gradients
         for i in range(len(self.gradient_accumulation)):
-            self.gradient_accumulation[i] += gradients[i]
+            self.gradient_accumulation[i].assign_add(gradients[i])
 
         # If accum_step_counter reach the accum_steps then we apply accumulated gradients to update the variables
         # otherwise do nothing
@@ -82,7 +82,7 @@ class GAModelWrapper(tf.keras.Model):
         # reset
         self.accum_step_counter.assign(0)
         for i in range(len(self.gradient_accumulation)):
-            self.gradient_accumulation[i] = tf.zeros_like(self.trainable_variables[i], dtype=tf.float32)
+            self.gradient_accumulation[i].assign(tf.zeros_like(self.trainable_variables[i], dtype=tf.float32))
 
     def reinit_grad_accum(self):
         self.gradient_accumulation = [ 
