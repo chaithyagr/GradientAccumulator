@@ -78,6 +78,7 @@ class GAModelWrapper(tf.keras.Model):
 
     def apply_accu_gradients(self):
         # apply accumulated gradients
+        log.info("Applying accumulated gradients")
         self.optimizer.apply_gradients(zip(self.gradient_accumulation, self.trainable_variables))
 
         # reset
@@ -86,6 +87,7 @@ class GAModelWrapper(tf.keras.Model):
             self.gradient_accumulation[i].assign(tf.zeros_like(self.gradient_accumulation[i]))
         
     def reinit_grad_accum(self):
+        log.info("Reinit accumulated gradients")
         self.gradient_accumulation = [ 
             tf.Variable(
                 tf.zeros_like(var),
