@@ -1,6 +1,8 @@
 import tensorflow as tf
 from . import agc
+import logging
 
+log = logging.getLogger(__name__)
 
 # https://stackoverflow.com/a/66524901
 # https://keras.io/guides/customizing_what_happens_in_fit/
