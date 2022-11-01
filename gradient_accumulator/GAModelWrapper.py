@@ -96,6 +96,8 @@ class GAModelWrapper(tf.keras.Model):
                 dtype=tf.float32,
                 tainable=False,
                 name='accum_grad_{}'.format(self.var_init),
+                synchronization=tf.VariableSynchronization.ON_READ,
+                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,                              
             ) for var in self.trainable_variables
         ]
         self.var_init += 1
