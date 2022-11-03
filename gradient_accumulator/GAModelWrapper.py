@@ -95,10 +95,10 @@ class GAModelWrapper(tf.keras.Model):
                 tf.zeros_like(var),
                 dtype=tf.float32,
                 trainable=False,
-                name='accum_grad_{}'.format(self.var_init),
+                name='accum_grad_{}_ctr_{}'.format(i, self.var_init),
                 synchronization=tf.VariableSynchronization.ON_READ,
                 aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,                              
-            ) for var in self.trainable_variables
+            ) for i, var in enumerate(self.trainable_variables)
         ]
         self.var_init += 1
         self.accum_step_counter.assign(0)
