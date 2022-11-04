@@ -15,7 +15,7 @@ class GAModelWrapper(tf.keras.Model):
                                               synchronization=tf.VariableSynchronization.ON_READ,
                                               aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,
                                               )
-        self.var_init = 0
+        self.gradient_accumulation = []
         self.reinit_grad_accum()
         self.mixed_precision = mixed_precision
         self.use_agc = use_agc
@@ -67,7 +67,7 @@ class GAModelWrapper(tf.keras.Model):
 
         # Accumulate batch gradients
         for i in range(len(self.gradient_accumulation)):
-            self.gradient_accumulation[i].assign_add(gradients[i])
+            self.gradient_accumulation[i] += gradients[i]
 
         # If accum_step_counter reach the accum_steps then we apply accumulated gradients to update the variables
         # otherwise do nothing
@@ -86,21 +86,15 @@ class GAModelWrapper(tf.keras.Model):
         # reset
         self.accum_step_counter.assign(0)
         for i in range(len(self.gradient_accumulation)):
-            self.gradient_accumulation[i].assign(tf.zeros_like(self.gradient_accumulation[i]))
+            self.gradient_accumulation[i] = tf.zeros_like(self.gradient_accumulation[i])
         
     def reinit_grad_accum(self):
         log.info("Reinit accumulated gradients")
+        del self.gradient_accumulation
         self.gradient_accumulation = [ 
-            tf.Variable(
-                tf.zeros_like(var),
-                dtype=tf.float32,
-                trainable=False,
-                name='accum_grad_{}_ctr_{}'.format(i, self.var_init),
-                synchronization=tf.VariableSynchronization.ON_READ,
-                aggregation=tf.VariableAggregation.ONLY_FIRST_REPLICA,                              
-            ) for i, var in enumerate(self.trainable_variables)
+            tf.zeros_like(var)
+            for i, var in enumerate(self.trainable_variables)
         ]
-        self.var_init += 1
         self.accum_step_counter.assign(0)
     """
     def test_step(self, data):
